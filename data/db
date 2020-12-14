@@ -1,0 +1,45 @@
+DELETE FROM USER_SDO_GEOM_METADATA;
+DELETE FROM USER_SDO_NETWORK_MEtADAtA;
+
+DROP TABLE LINKS;
+DROP TABLE NODES;
+
+CREATE TABLE NODES (
+    node_id NUMBER NOT NULL,
+    node_name VARCHAR2(32) NOT NULL,
+    location SDO_GEOMETRY NOT NULL,
+    PRIMARY KEY (node_id)
+);
+
+CREATE TABLE LINKS (
+    link_id NUMBER NOT NULL,
+    start_node_id NUMBER NOT NULL,
+    end_node_id NUMBER NOT NULL,
+    geom SDO_GEOMETRY,
+    PRIMARY KEY (link_id),
+    FOREIGN KEY (start_node_id) REFERENCES NODES(node_id),
+    FOREIGN KEY (end_node_id) REFERENCES NODES(node_id)
+);
+
+INSERT INTO user_sdo_geom_metadata (table_name, column_name, diminfo, srid) values ('NODES','LOCATION', sdo_dim_array(sdo_dim_element('X',0, 90, 0.0001),sdo_dim_element('Y',0,180,0.0001)), 32039);  
+INSERT INTO user_sdo_geom_metadata (table_name, column_name, diminfo, srid) values ('LINKS','GEOM', sdo_dim_array(sdo_dim_element('X',0,90,0.0001),sdo_dim_element('Y',0,180,0.0001)), 32039);  
+
+INSERT INTO USER_SDO_NETWORK_METADATA (
+    NETWORK,
+    NETWORK_CATEGORY,
+    GEOMETRY_TYPE,
+    NODE_TABLE_NAME,
+    NODE_GEOM_COLUMN,
+    LINK_TABLE_NAME,
+    LINK_GEOM_COLUMN,
+    LINK_DIRECTION
+) VALUES (
+    'CITY',
+    'SPATIAL',
+    'SDO_GEOMETRY',
+    'NODES',
+    'LOCATION',
+    'LINKS',
+    'GEOM',
+    'UNDIRECTED'
+);
